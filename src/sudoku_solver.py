@@ -2,26 +2,16 @@
 
 """
 sudoku_solver.py:
-This program uses constraint propogation and backtracking to solve any given
-9x9 Sudoku.
-
-
-Naming:
-All the rows are numbered from A to I.
-All the columns are numbered from 1 to 9
-Each cell position is represented as row and column name: A6
-
-Also, for any given unfilled Suoku board, it's child is a board derived from
-it by filling an empty cell position using constraints.
-
+This script creates an initial parent board from the user input,
+then uses constraint propagation to create children boards and iterate
+over them and uses recursion to create further children boards until
+it either reaches a solution or backtracks to the last correct parent
+board and iterates over it's next children board.
 
 Input:
-The input to this program is a string of all values for each position starting
-from first row to the last row. Empty cells are filled with value 0.
-The program will automatically convert string input to integers and print out
-the solved sudoku after solving it.
-
-Average time for solving worst case scenario (empty sudoku) - 0.02 secs
+The input is a string of numbers consisting of sudoku values in row major form.
+Empty sudko cells are to be filled with a value of 0 in input string.
+The program will print out solved sudoku.
 """
 
 __author__ = "Rahul Shekhawat"
@@ -41,9 +31,8 @@ import argparse
 
 def elements_of_sudoku():
 
-    # A list of all 3x3 grid's lists on the Sudoku board
-    # Each 3x3 grid list contains the position name for each cell in grid.
-    # [[3x3 grid], [3x3 grid], ...]
+    # A list of of all 3x3 grids in a sudoku
+    # where each 3x3 is a list of cells that it contains
     matrices_list = []
     for L in ('ABC', 'DEF', 'GHI'):
         for N in ('123', '456', '789'):
@@ -53,9 +42,9 @@ def elements_of_sudoku():
                     temp.append(l + n)
             matrices_list.append(temp)
 
-    # A dictionary containing the cell positions as key and 3x3 grid list that
+    # A dictionary containing the cell positions as key and the 3x3 grid that
     # it belong to as it's value.
-    # Dict[cell_position] = grid_list (if cell_position in grid_list)
+    # Dict[cell_position] = grid_list (if cell_position is in grid_list)
     matrices = {}
     for letter in 'ABCDEFGHI':
         for num in '123456789':
@@ -95,8 +84,9 @@ class Board:
         self.children = []
 
     def _assert_board_is_correct(self):
-        # If a cell is filled with some value, assert that none of the rows,
-        # columns, and 3x3 grids have the same value.
+        # If a sudoku cell is already filled, then make sure that the row,
+        # column, and 3x3 grid containing the cell don't have the same
+        # value filled again.
         for pos in self.positions:
             value = self.board[pos]
             if value != 0:
@@ -107,15 +97,17 @@ class Board:
 
     def create_children(self):
         """
-        A given unfilled sudoku can have only 1 valid child board. But in case
-        the valid child cannot be found using constraints, a list of possible
-        valid children is generated and returned.
+        This method generates and populates the self.children list with
+        the children board for given board instance.
 
-        If the Sudoku board cannot have any possible children because it is
-        already solved, then self.children will be an empty list.
-        If it is because the sudoku board is invalid (wrong choice made while
-        filling a position) then self.children will contain a single
-        'None' element.
+        Any given unfilled sudoku board can have only a single valid child
+        board but its possible that we may fail to find the valid child
+        using a simple constraints check. In this case the self.children
+        is populated with a list of all the probable children.
+
+        If the sudoku board is alread solved, then self.children will be
+        an empty list. If the sudoku board is invalid (wrong choice made
+        while filling a position) then self.children will be set to None.
         """
 
         # No need to search for a child if the Sudoku is already solved.
@@ -200,10 +192,10 @@ def solve_board(board):
                     return solution
                 else:
                     # Pass because you need to check if the next child
-                    # of board is the correct answer
+                    # is a solution.
                     pass
-        # If the for loop finished without returning a solution
-        # then it means that board was a wrong choice
+        # If the for loop finished without returning a solution,
+        # then the current board was a wrong choice
         return None
 
 
@@ -212,7 +204,7 @@ if __name__ == '__main__':
 
     # Default input is an empty Sudoku board.
     parser.add_argument("-i", "--input",
-                        help="Input the sudoku rows top to bottom. Enter 0\
+                        help="Input the sudoku values in row major form. Enter 0\
                         for empty cells. e.g.-  501403....708",
                         default='0' * 81)
 
@@ -241,5 +233,5 @@ if __name__ == '__main__':
             print(key, ':', solution.board[key], sep='', end='   ')
 
     stop = time.time()
-    print("\nTime consumed for solving given Sudoku: {0} Secs".
+    print("\nTime taken for solving given Sudoku: {0} Secs".
           format(stop - start))
