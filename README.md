@@ -1,4 +1,4 @@
-# Sudoku Solver ([Python](src/sudoku_solver.py))
+# [Sudoku Solver](src/sudoku_solver.py) (Python)
 
 This repository contains a simple python script that uses constraint propagation and backtracking to solve any 9x9 sudoku.
 
